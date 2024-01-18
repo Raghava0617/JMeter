@@ -23,3 +23,4 @@ jobs:
       run: |
         cd apache-jmeter-5.4.1/bin
         ./jmeter
+        jmeter -n -t JpetStore.jmx -l jpet.JTL -e -o Dashboard
