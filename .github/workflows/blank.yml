@@ -1,26 +1,31 @@
-name: JMeter GUI Test Pipeline
-
-on:
-  push:
-    branches: [ master ]
-
+on: [push]
 jobs:
-  build:
+  jmeter_job:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Java
-      uses: actions/setup-java@v2
+    name: JMeter Test Execution
+    steps:      
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Create reports directory
+      run: mkdir reports
+      
+    - name: Run JMeter Tests
+      uses: ./
       with:
-        java-version: '11'
-        distribution: 'zulu'
-    - name: Install JMeter
-      run: |
-        wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.4.1.tgz
-        tar -xzf apache-jmeter-5.4.1.tgz
-        rm apache-jmeter-5.4.1.tgz
-    - name: Run JMeter GUI Test
-      run: |
-        cd apache-jmeter-5.4.1/bin
-        ./jmeter
-        jmeter -n -t JpetStore.jmx -l jpet.JTL -e -o Dashboard
+        test-plan-path: ./JpetStore.jmx
+        args: "-e -o ./reports/html/"
+        
+    - name: Upload Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-results
+        path: result.jtl
+        if-no-files-found: error
+
+    - name: Upload HTML Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: jmeter-reports
+        path: reports
+        if-no-files-found: error
